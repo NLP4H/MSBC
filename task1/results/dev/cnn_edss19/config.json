@@ -1,0 +1,106 @@
+{
+    "dataset_reader": {
+        "type": "data_scripts.datasetreaders.ms_edss19_reader",
+        "token_indexers": {
+            "tokens": {
+                "type": "pretrained_transformer",
+                "max_length": 512,
+                "model_name": "master_path/models/base_blue_bert_pt",
+                "namespace": "tokens"
+            }
+        }
+    },
+    "model": {
+        "type": "models.ms_classifiers.ms_classifier",
+        "dropout": 0.1,
+        "feedforward": {
+            "activations": [
+                "relu",
+                "relu"
+            ],
+            "hidden_dims": [
+                500,
+                250
+            ],
+            "input_dim": 768,
+            "num_layers": 2
+        },
+        "label_namespace": "edss19_labels",
+        "seq2vec_encoder": {
+            "type": "cnn",
+            "embedding_dim": 768,
+            "ngram_filter_sizes": [
+                2,
+                3,
+                4,
+                5,
+                6,
+                10
+            ],
+            "num_filters": 128
+        },
+        "text_field_embedder": {
+            "token_embedders": {
+                "tokens": {
+                    "type": "pretrained_transformer",
+                    "max_length": 512,
+                    "model_name": "master_path/models/base_blue_bert_pt"
+                }
+            }
+        }
+    },
+    "train_data_path": "master_path/data/neurology_notes/processed_data/tokenized_train_data.csv",
+    "validation_data_path": "master_path/data/neurology_notes/processed_data/tokenized_val_data.csv",
+    "test_data_path": "master_path/data/neurology_notes/processed_data/tokenized_test_data.csv",
+    "trainer": {
+        "checkpointer": {
+            "keep_serialized_model_every_num_seconds": null,
+            "num_serialized_models_to_keep": 1
+        },
+        "cuda_device": 0,
+        "distributed": false,
+        "grad_clipping": 1,
+        "grad_norm": 1,
+        "histogram_interval": 10,
+        "learning_rate_scheduler": {
+            "type": "reduce_on_plateau",
+            "min_lr": 5e-05
+        },
+        "local_rank": 0,
+        "log_batch_size_period": 100,
+        "model_save_interval": null,
+        "moving_average": null,
+        "no_grad": [
+            "embedder"
+        ],
+        "num_epochs": 50,
+        "num_gradient_accumulation_steps": 4,
+        "optimizer": {
+            "type": "huggingface_adamw",
+            "correct_bias": true,
+            "lr": 0.0005,
+            "weight_decay": 0.01
+        },
+        "patience": 5,
+        "should_log_learning_rate": true,
+        "should_log_parameter_statistics": true,
+        "summary_interval": 1,
+        "validation_metric": "+f1",
+        "world_size": 1
+    },
+    "data_loader": {
+        "batch_sampler": {
+            "type": "bucket",
+            "batch_size": 5,
+            "padding_noise": 0
+        }
+    },
+    "evaluate_on_test": true,
+    "validation_data_loader": {
+        "batch_sampler": {
+            "type": "bucket",
+            "batch_size": 5,
+            "padding_noise": 0
+        }
+    }
+}
